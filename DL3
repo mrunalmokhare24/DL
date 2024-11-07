@@ -1,0 +1,85 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense,Flatten
+from tensorflow.keras.utils import to_categorical
+from sklearn.model_selection import train_test_split
+data = pd.read_csv("OneDrive/Desktop/DL COdes/3 MNIST/mnist_784_csv.csv")
+data.head()
+
+X = data.drop(columns=['class']).values
+Y = data['class'].values
+X.shape
+(70000, 784)
+Y.shape
+(70000, 10)
+Y = to_categorical(Y,num_classes=10)
+x_train , x_test , y_train , y_test = train_test_split(X,Y,test_size=0.2)
+print(x_train.shape)
+print(y_train.shape)
+print(x_test.shape)
+print(y_test.shape)
+
+sample_image = x_train[5].reshape(28, 28)
+
+# if y_test.ndim > 1:  # Check if y_test is one-hot encoded
+digit_label = np.argmax(y_train[5])  # Get the index of the maximum value
+# else:
+    # digit_label = y_test[0]  # If already a single integer label
+
+# Display the image
+plt.matshow(sample_image, cmap='gray')
+plt.title(f"Label: {digit_label}")  # Show the digit label
+plt.axis('off')
+plt.show()
+
+for i in range(10):
+    plt.figure(figsize=(4,20))
+    sample_image = x_train[i].reshape(28, 28)
+    digit_label = np.argmax(y_train[i])  # Get the index of the maximum value
+    plt.matshow(sample_image, cmap='gray')
+    plt.title(f"Label: {digit_label}")  # Show the digit label
+    plt.axis('off')
+plt.show()
+
+model = Sequential([Flatten(input_shape=(784,)),
+                    Dense(128,activation='relu'),
+                    Dense(64,activation='relu'),
+                    Dense(10,activation='softmax')
+                   ])
+
+model.compile(optimizer='adam',loss='categorical_crossentropy',metrics=['accuracy'])
+history = model.fit(x_train,y_train,epochs=5,batch_size=32,validation_split=0.2)
+
+test_loss , test_acc = model.evaluate(x_test,y_test)
+
+print(test_loss)
+print(test_acc)
+
+plt.plot(history.history['accuracy'],label='Training Accuracy')
+plt.plot(history.history['val_accuracy'],label='Validation Accuracy')
+plt.xlabel('Epoch')
+plt.ylabel('Accuracy')
+plt.legend()
+plt.show()
+
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('model_loss')
+plt.ylabel('loss')
+plt.xlabel('epoch')
+plt.legend(['Train','Validation'],loc='upper right')
+plt.show()
+
+
+
+for i in range(10):
+    plt.figure(figsize=(4,20))
+    sample_image = x_test[i].reshape(28, 28)
+    digit_label = np.argmax(y_test[i])  # Get the index of the maximum value
+    plt.imshow(sample_image, cmap='gray')
+    plt.title(f"Label: {digit_label}")  # Show the digit label
+    plt.axis('off')
+plt.show()
+
